@@ -14,9 +14,7 @@ Created on Sun Jan 22 13:44:47 2023
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import scipy.optimize as opt
-import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 file1 = 'TotalPopulation.xls'
@@ -38,8 +36,8 @@ year1 = '1981'
 year2 = '2021'
 
 
-# listing regional countries that may distort in data
-regional_list = ['Africa Eastern and Southern', 'North America', 'Arab World', 'Caribbean small states', 'Central African Republic', 'Central Europe and the Baltics',
+# listing regional countries and outliers that may distort in data
+regional_list = ['Africa Eastern and Southern', 'Germany', 'Congo, Dem. Rep.', 'North America', 'Arab World', 'Caribbean small states', 'Central African Republic', 'Central Europe and the Baltics',
                  'Early-demographic dividend', 'East Asia & Pacific',
                  'East Asia & Pacific (IDA & IBRD countries)',
                  'East Asia & Pacific (excluding high income)', 'Europe & Central Asia',
@@ -81,7 +79,7 @@ pop_clust.plot(year1, year2, kind='scatter', color='blue')
 plt.title('Total Population')
 
 
-# Normalize the data
+# Normalize the data using MinMax Normalization method
 max_value = p.max()
 min_value = p.min()
 # normalized data
@@ -97,6 +95,7 @@ for i in range(1, 11):
     sse.append(kmeans.inertia_)
 
 # plotting to check for appropriate number of clusters using elbow method
+plt.style.use('seaborn')
 plt.figure(dpi=140)
 plt.plot(range(1, 11), sse, color='red')
 plt.title('Elbow Method')
@@ -125,6 +124,7 @@ print(cen)
 
 
 # Plot the scatter plot of the clusters
+plt.style.use('seaborn')
 plt.figure(dpi=140)
 plt.scatter(p_norm[:, 0], p_norm[:, 1], c=kmeans.labels_)
 plt.title('K-Means Clustering')
@@ -141,20 +141,22 @@ print(y_predict)
 # creating new dataframe with the labels for each country
 pop_clust['cluster'] = y_predict
 print('\n Countries and Cluster Category:\n', pop_clust)
+pop_clust.to_csv('cluster_results.csv')
 
 
 # plotting the normalised Population
+plt.style.use('seaborn')
 plt.figure(dpi=140)
 plt.scatter(p_norm[y_predict == 0, 0], p_norm[y_predict ==
             0, 1], s=50, c='blue', label='cluster 0')
 plt.scatter(p_norm[y_predict == 1, 0], p_norm[y_predict ==
-            1, 1], s=50, c='red', label='cluster 1')
+            1, 1], s=50, c='green', label='cluster 1')
 plt.scatter(p_norm[y_predict == 2, 0], p_norm[y_predict ==
-            2, 1], s=50, c='green', label='cluster 2')
-plt.scatter(cen[:, 0], cen[:, 1], s=50, c='black', label='Centroids')
-plt.title('Total Population (Normalised)')
-plt.xlabel('1981')
-plt.ylabel('2021')
+            2, 1], s=50, c='orange', label='cluster 2')
+plt.scatter(cen[:, 0], cen[:, 1], s=50, c='red', label='Centroids')
+plt.title('Total Population (Normalised)', fontweight='bold')
+plt.xlabel('1981', fontweight='bold')
+plt.ylabel('2021', fontweight='bold')
 plt.legend()
 plt.show()
 
@@ -162,17 +164,18 @@ plt.show()
 cent = cen * (max_value - min_value) + min_value
 
 # plotting the Population in their clusters with the centroid points
-plt.figure(dpi=140)
+plt.style.use('seaborn')
+plt.figure(dpi=600)
 plt.scatter(p[y_predict == 0, 0], p[y_predict == 0, 1],
-            s=50, c='blue', label='cluster 0')
+            s=50, c='blue', label='98million-999million')
 plt.scatter(p[y_predict == 1, 0], p[y_predict == 1, 1],
-            s=50, c='red', label='cluster 1')
+            s=50, c='green', label='Above 1billion')
 plt.scatter(p[y_predict == 2, 0], p[y_predict == 2, 1],
-            s=50, c='green', label='cluster 2')
-plt.scatter(cent[:, 0], cent[:, 1], s=50, c='black', label='Centroids')
-plt.title('Total Population')
-plt.xlabel('1981')
-plt.ylabel('2021')
+            s=50, c='violet', label='Below 98million')
+plt.scatter(cent[:, 0], cent[:, 1], s=50, c='red', label='Centroids')
+plt.title('Total Population', fontweight='bold', fontsize=14)
+plt.xlabel('1981', fontweight='bold', fontsize=14)
+plt.ylabel('2021', fontweight='bold', fontsize=14)
 plt.legend()
 plt.show()
 
@@ -207,9 +210,8 @@ def logistic(t, n0, g, t0):
 def err_ranges(x, func, param, sigma):
     """
     This function calculates the upper and lower limits of function, parameters and
-    sigmas for a single value or array x. The function values are calculated for 
-    all combinations of +/- sigma and the minimum and maximum are determined.
-    This can be used for all number of parameters and sigmas >=1.
+    sigmas for a single value or array x.
+    where Sigma is the Standard Deviation
     """
 
     import itertools as iter
@@ -238,7 +240,7 @@ def err_ranges(x, func, param, sigma):
 
 # fits the logistic data
 param_ch, covar_ch = opt.curve_fit(logistic, df_fit['Year'], df_fit['China'],
-                                   p0=(3e12, 0.03, 2000))
+                                   p0=(3e12, 0.03, 2041))
 
 # calculating the standard deviation
 sigma_ch = np.sqrt(np.diag(covar_ch))
@@ -246,28 +248,30 @@ sigma_ch = np.sqrt(np.diag(covar_ch))
 # creating a new column with the fit data
 df_fit['fit'] = logistic(df_fit['Year'], *param_ch)
 
-# Forecast for the next 10 years
-year = np.arange(1960, 2031)
+# Forecast for the next 20 years
+year = np.arange(1960, 2041)
 forecast = logistic(year, *param_ch)
+
 
 # calculates the error ranges
 low_ch, up_ch = err_ranges(year, logistic, param_ch, sigma_ch)
 
 # plotting China's Total Population
-plt.figure(dpi=140)
+plt.style.use('seaborn')
+plt.figure(dpi=600)
 plt.plot(df_fit["Year"], df_fit["China"],
-         label="Population")
-plt.plot(year, forecast, label="forecast")
-plt.fill_between(year, low_ch, up_ch, color="yellow",
-                 alpha=0.7, label='Error ranges')
-plt.xlabel("Year")
-plt.ylabel("Population")
+         label="Population", c='purple')
+plt.plot(year, forecast, label="Forecast", c='red')
+plt.fill_between(year, low_ch, up_ch, color="orange",
+                 alpha=0.7, label='Confidence Range')
+plt.xlabel("Year", fontweight='bold', fontsize=14)
+plt.ylabel("Population",fontweight='bold', fontsize=14)
 plt.legend()
-plt.title('China Population Forecast')
+plt.title('China', fontweight='bold', fontsize=14)
 plt.show()
 
 # prints the error ranges
-print(err_ranges(2031, logistic, param_ch, sigma_ch))
+print(err_ranges(2041, logistic, param_ch, sigma_ch))
 
 # fitting the United State's Population data
 us = df2[['Year', 'United States']].apply(pd.to_numeric,
@@ -275,28 +279,29 @@ us = df2[['Year', 'United States']].apply(pd.to_numeric,
 
 # fits the US logistic data
 param_us, covar_us = opt.curve_fit(logistic, us['Year'], us['United States'],
-                                   p0=(3e12, 0.03, 2031))
+                                   p0=(3e12, 0.03, 2041))
 
 # calculates the standard deviation for United States data
 sigma_us = np.sqrt(np.diag(covar_us))
 
-# Forecast for the next 10 years
+# Forecast for the next 20 years
 forecast_us = logistic(year, *param_us)
 
 # calculate error ranges
 low_us, up_us = err_ranges(year, logistic, param_us, sigma_us)
 
 # plotting United State's Total Population
-plt.figure(dpi=140)
+plt.style.use('seaborn')
+plt.figure(dpi=600)
 plt.plot(us["Year"], us["United States"],
          label="Population")
-plt.plot(year, forecast_us, label="forecast")
-plt.fill_between(year, low_us, up_us, color="yellow",
-                 alpha=0.7, label="Error Ranges")
-plt.xlabel("Year")
-plt.ylabel("Population")
-plt.legend()
-plt.title('US Population Forecast - Confidence Interval')
+plt.plot(year, forecast_us, label="Forecast", c='red')
+plt.fill_between(year, low_us, up_us, color="orange",
+                 alpha=0.7, label="Confidence Range")
+plt.xlabel("Year", fontweight='bold', fontsize=14)
+plt.ylabel("Population", fontweight='bold', fontsize=14)
+plt.legend(loc='upper left')
+plt.title('US Population', fontweight='bold', fontsize=14)
 plt.show()
 
 # fitting the data
@@ -305,12 +310,12 @@ Gh = df2[['Year', 'Ghana']].apply(pd.to_numeric,
 
 # fits the Ghana's logistic data
 param_gh, covar_gh = opt.curve_fit(logistic, Gh['Year'], Gh['Ghana'],
-                                   p0=(3e12, 0.03, 2031))
+                                   p0=(3e12, 0.03, 2041))
 
 # sigma is the standard deviation
 sigma_gh = np.sqrt(np.diag(covar_gh))
 
-# Forecast for the next 10 years
+# Forecast for the next 20 years
 forecast_gh = logistic(year, *param_gh)
 
 # calculate error ranges
@@ -320,16 +325,17 @@ low_gh, up_gh = err_ranges(year, logistic, param_gh, sigma_gh)
 Gh['fit'] = logistic(Gh['Year'], *param_gh)
 
 # plotting Ghana's Total Population
-plt.figure(dpi=140)
+plt.style.use('seaborn')
+plt.figure(dpi=600)
 plt.plot(Gh["Year"], Gh["Ghana"],
-         label="Population")
-plt.plot(year, forecast_gh, label="forecast")
-plt.fill_between(year, low_gh, up_gh, color="yellow",
-                 alpha=0.7, label='Error Ranges')
-plt.xlabel("Year")
-plt.ylabel("Population")
-plt.legend()
-plt.title('Ghana Population Forecast ')
+         label="Population", c='green')
+plt.plot(year, forecast_gh, label="Forecast", c='red')
+plt.fill_between(year, low_gh, up_gh, color="orange",
+                 alpha=0.7, label='Confidence Range')
+plt.xlabel("Year", fontweight='bold', fontsize=14)
+plt.ylabel("Population", fontweight='bold', fontsize=14)
+plt.legend(loc='upper left')
+plt.title('Ghana', fontweight='bold', fontsize=14)
 plt.show()
 
 #reading the GDP/Capita file from the world bank format
@@ -368,18 +374,21 @@ g_chi['fit'] = poly(g_chi['Year'], *param_cg)
 #forecasting the fit figures
 forecast_cg = poly(year, *param_cg)
 
+
 # calculate error ranges 
 low_cg, up_cg = err_ranges(year, poly, param_cg, sigma_cg)
 
 #Plotting
+plt.style.use('seaborn')
+plt.figure(dpi=600)
 plt.plot(g_chi["Year"], g_chi["China"], 
-         label="Population")
-plt.plot(year, forecast_cg, label="Forecast")
+         label="GDP/Capita", c='purple')
+plt.plot(year, forecast_cg, label="Forecast", c='red')
 
-plt.xlabel("Year")
-plt.ylabel("Population")
+plt.xlabel("Year", fontweight='bold',fontsize=14)
+plt.ylabel("Population", fontweight='bold', fontsize=14)
 plt.legend()
-plt.title('China')
+plt.title('China', fontweight='bold', fontsize=14)
 plt.show()
 
 
@@ -388,25 +397,28 @@ g_us = g[['Year', 'United States']].apply(pd.to_numeric,
                                                errors='coerce')
 
 #fits the linear data
-param_usg, cov_usg = opt.curve_fit(poly, g_us['Year'], g_us['United States'], 
-                )
+param_usg, cov_usg = opt.curve_fit(poly, g_us['Year'], g_us['United States'])
+
 #calculates the standard deviation
 sigma_usg = np.sqrt(np.diag(cov_usg))
 
 #creates a column for the fit data
 g_us['fit'] = poly(g_us['Year'], *param_usg)
 
-#forecasting for the next 10 years
+#forecasting for the next 20 years
 forecast_usg = poly(year, *param_usg)
 
+
 #plotting
+plt.style.use('seaborn')
+plt.figure(dpi=600)
 plt.plot(g_us["Year"], g_us["United States"], 
-         label="Population")
-plt.plot(year, forecast_usg, label="Forecast")
-plt.xlabel("Year")
-plt.ylabel("GDP per Capita ('US$')")
+         label="GDP/Capita")
+plt.plot(year, forecast_usg, label="Forecast", c='red')
+plt.xlabel("Year", fontweight='bold', fontsize=14)
+plt.ylabel("GDP per Capita ('US$')", fontweight='bold', fontsize=14)
 plt.legend()
-plt.title('United States')
+plt.title('United States', fontweight='bold', fontsize=14)
 plt.show()
 
 #fitting the data
@@ -422,15 +434,21 @@ sigma_ghg = np.sqrt(np.diag(cov_ghg))
 #creates a new column for the fit data
 g_gh['fit'] = poly(g_gh['Year'], *param_ghg)
 
-#forescast paramaters for the next 10 years
+#forescast paramaters for the next 20 years
 forecast_ghg = poly(year, *param_ghg)
 
+
 #plotting
+plt.style.use('seaborn')
+plt.figure(dpi=600)
 plt.plot(g_gh["Year"], g_gh["Ghana"], 
-         label="Population")
-plt.plot(year, forecast_ghg, label="Forecast")
-plt.xlabel("Year")
-plt.ylabel("GDP per Capita ('US$')")
+         label="GDP/Capita", c='green')
+plt.plot(year, forecast_ghg, label="Forecast", c='red')
+plt.xlabel("Year", fontweight='bold', fontsize=14)
+plt.ylabel("GDP per Capita ('US$')", fontweight='bold', fontsize=14)
 plt.legend()
-plt.title('Ghana')
+plt.title('Ghana', fontweight='bold',fontsize=14)
 plt.show()
+
+
+
