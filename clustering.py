@@ -25,16 +25,26 @@ file2 = "gdppercapita.xls"
 
 
 def read(filename):
-    """ This function reads a file in its original and transponsed format"""
+    """ Reads a CSV file and returns the original dataframe and its transposed version.
+    
+    Parameters:
+        filename: The filepath of the CSV file to be read.
+        
+    Returns:
+        [DataFrame, DataFrame Transposed]: The original dataframe
+        and its transposed version."""
+        
     data = pd.read_excel(filename, skiprows=3)
     data.drop(data.columns[[1, 2, 3]], axis=1, inplace=True)
     return data, data.transpose()
 
 
-# reading the Total Population file where pop is the original format and popT the transposed format
+# reading the Total Population file where pop is the original format and 
+# popT the transposed format
 pop, popT = read(file1)
 print(pop)
 
+#The selected years clustering analysis
 year1 = '1981'
 year2 = '2021'
 
@@ -182,6 +192,8 @@ plt.ylabel('2021', fontweight='bold', fontsize=14)
 plt.legend()
 plt.show()
 
+#Curve Fitting Solutions
+
 # reading the Total population file from the world bank format
 pop, pop2 = read(file1)
 print(pop2)
@@ -202,17 +214,34 @@ df_fit = df2[['Year', 'China']].apply(pd.to_numeric,
 
 # Logistic function for curve fitting and forecasting the Total Population
 def logistic(t, n0, g, t0):
-    """ This fuction calculates the logistic function with scale factor n0
+    """ Calculates the logistic growth of a population.
+    
+    Parameters:
+        t: The current time.
+        n0: The initial population.
+        g: The growth rate.
+        t0: The inflection point.
+        
+    Returns:
+       The population at the given time
     and growth rate g"""
+    
     f = n0 / (1 + np.exp(-g*(t - t0)))
     return f
 
 # Error ranges calculation
 def err_ranges(x, func, param, sigma):
     """
-    This function calculates the upper and lower limits of function, parameters and
-    sigmas for a single value or array x.
-    where Sigma is the Standard Deviation
+    Calculates the error ranges for a given function and its parameters.
+    
+    Parameters:
+        x : The input value for the function.
+        func: The function for which the error ranges will be calculated.
+        param: A tuple of parameters for the function.
+        sigma: The standard deviation of the data.
+        
+    Returns:
+         A tuple containing the lower and upper error ranges.
     """
     # initiate arrays for lower and upper limits
     lower = func(x, *param)
@@ -354,9 +383,17 @@ g_chi = g[['Year', 'China']].apply(pd.to_numeric,
 # poly function for forecasting GDP/Capita
 def poly(x, a, b, c):
     
-    """ Function for fitting
-    x: independent variable
-    a, b, c: parameters to be fitted
+    """ Calculates the value of a polynomial function of the form ax^2 + bx + c.
+    
+    Parameters:
+        x: The input value for the polynomial function.
+        a: The coefficient of x^2 in the polynomial.
+        b: The coefficient of x in the polynomial.
+        c: The constant term in the polynomial.
+        
+    Returns:
+           The value of the polynomial function at x.
+      
     """
     return a*x**2 + b*x + c
 
@@ -447,3 +484,6 @@ plt.ylabel("GDP per Capita ('US$')", fontweight='bold', fontsize=14)
 plt.legend()
 plt.title('Ghana', fontweight='bold',fontsize=14)
 plt.show()
+
+
+
