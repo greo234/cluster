@@ -397,6 +397,25 @@ def poly(x, a, b, c):
     """
     return a*x**2 + b*x + c
 
+def get_error_estimates(x, y, degree):
+    """
+   Calculates the error estimates of a polynomial function.
+   
+   Parameters:
+       x : The x-values of the data points.
+       y : The y-values of the data points.
+       degree: The degree of the polynomial.
+       
+   Returns:
+       The standard deviation of the residuals as the error estimate.
+       """
+      
+    coefficients = np.polyfit(x, y, degree)
+    y_estimate = np.polyval(coefficients, x)
+    residuals = y - y_estimate
+ 
+    return np.std(residuals)
+
 #fits the linear data
 param_cg, cov_cg = opt.curve_fit(poly, g_chi['Year'], g_chi['China'] )
 
@@ -409,9 +428,9 @@ g_chi['fit'] = poly(g_chi['Year'], *param_cg)
 #forecasting the fit figures
 forecast_cg = poly(year, *param_cg)
 
-
-# calculate error ranges 
-low_cg, up_cg = err_ranges(year, poly, param_cg, sigma_cg)
+#error estimates
+error_cg = get_error_estimates(year, forecast_cg, 2)
+print('\n Error Estimates for China GDP/Capita:\n', error_cg)
 
 #Plotting
 plt.style.use('seaborn')
@@ -443,6 +462,9 @@ g_us['fit'] = poly(g_us['Year'], *param_usg)
 #forecasting for the next 20 years
 forecast_usg = poly(year, *param_usg)
 
+#error estimates
+error_us = get_error_estimates(year, forecast_usg, 2)
+print('\n Error Estimates for US GDP/Capita:\n', error_us)
 
 #plotting
 plt.style.use('seaborn')
@@ -472,6 +494,9 @@ g_gh['fit'] = poly(g_gh['Year'], *param_ghg)
 #forescast paramaters for the next 20 years
 forecast_ghg = poly(year, *param_ghg)
 
+#error estimates
+error_gh = get_error_estimates(year, forecast_ghg, 2)
+print('\n Error Estimates for Ghana GDP/Capita:\n', error_gh)
 
 #plotting
 plt.style.use('seaborn')
