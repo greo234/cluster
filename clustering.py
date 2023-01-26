@@ -17,6 +17,9 @@ import matplotlib.pyplot as plt
 import scipy.optimize as opt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+import itertools as iter
+
+#files for the analysis
 file1 = 'TotalPopulation.xls'
 file2 = "gdppercapita.xls"
 
@@ -205,17 +208,12 @@ def logistic(t, n0, g, t0):
     return f
 
 # Error ranges calculation
-
-
 def err_ranges(x, func, param, sigma):
     """
     This function calculates the upper and lower limits of function, parameters and
     sigmas for a single value or array x.
     where Sigma is the Standard Deviation
     """
-
-    import itertools as iter
-
     # initiate arrays for lower and upper limits
     lower = func(x, *param)
     upper = lower
@@ -449,6 +447,3 @@ plt.ylabel("GDP per Capita ('US$')", fontweight='bold', fontsize=14)
 plt.legend()
 plt.title('Ghana', fontweight='bold',fontsize=14)
 plt.show()
-
-
-
