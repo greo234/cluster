@@ -25,10 +25,10 @@ file2 = "gdppercapita.xls"
 
 
 def read(filename):
-    """ Reads a CSV file and returns the original dataframe and its transposed version.
+    """ Reads an Excel file and returns the original dataframe and its transposed version.
     
     Parameters:
-        filename: The filepath of the CSV file to be read.
+        filename: The filename of the Excel file to be read.
         
     Returns:
         [DataFrame, DataFrame Transposed]: The original dataframe
