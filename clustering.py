@@ -237,11 +237,11 @@ def err_ranges(x, func, param, sigma):
     Parameters:
         x : The input value for the function.
         func: The function for which the error ranges will be calculated.
-        param: A tuple of parameters for the function.
+        param: The parameters for the function.
         sigma: The standard deviation of the data.
         
     Returns:
-         A tuple containing the lower and upper error ranges.
+         The lower and upper error ranges.
     """
     # initiate arrays for lower and upper limits
     lower = func(x, *param)
@@ -398,6 +398,7 @@ def poly(x, a, b, c):
     return a*x**2 + b*x + c
 
 def get_error_estimates(x, y, degree):
+    
     """
    Calculates the error estimates of a polynomial function.
    
@@ -429,7 +430,7 @@ g_chi['fit'] = poly(g_chi['Year'], *param_cg)
 forecast_cg = poly(year, *param_cg)
 
 #error estimates
-error_cg = get_error_estimates(year, forecast_cg, 2)
+error_cg = get_error_estimates(g_chi['China'], g_chi['fit'], 2)
 print('\n Error Estimates for China GDP/Capita:\n', error_cg)
 
 #Plotting
@@ -463,7 +464,7 @@ g_us['fit'] = poly(g_us['Year'], *param_usg)
 forecast_usg = poly(year, *param_usg)
 
 #error estimates
-error_us = get_error_estimates(year, forecast_usg, 2)
+error_us = get_error_estimates(g_us['United States'], g_us['fit'], 2)
 print('\n Error Estimates for US GDP/Capita:\n', error_us)
 
 #plotting
@@ -495,7 +496,7 @@ g_gh['fit'] = poly(g_gh['Year'], *param_ghg)
 forecast_ghg = poly(year, *param_ghg)
 
 #error estimates
-error_gh = get_error_estimates(year, forecast_ghg, 2)
+error_gh = get_error_estimates(g_gh['Ghana'], g_gh['fit'], 2)
 print('\n Error Estimates for Ghana GDP/Capita:\n', error_gh)
 
 #plotting
@@ -509,6 +510,3 @@ plt.ylabel("GDP per Capita ('US$')", fontweight='bold', fontsize=14)
 plt.legend()
 plt.title('Ghana', fontweight='bold',fontsize=14)
 plt.show()
-
-
-
